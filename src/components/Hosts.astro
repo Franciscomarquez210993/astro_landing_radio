@@ -1,0 +1,89 @@
+---
+import SectionTitle from "./SectionTitle.astro";
+import { site } from "../config/site";
+
+// Generate placeholder initials avatar color based on name
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+}
+---
+
+<section id="locutores" class="py-24 lg:py-32 relative">
+  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+    <div
+      class="absolute top-1/2 right-0 w-[300px] h-[300px] rounded-full blur-3xl opacity-40"
+      style="background: radial-gradient(circle, rgba(233,179,58,0.08) 0%, transparent 70%);"
+    ></div>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-12">
+      <SectionTitle
+        eyebrow="Locutores"
+        title="Voces que iluminan"
+        subtitle="Conoce al equipo de conductores que cada día te acompañan con su fe, su conocimiento y su corazón."
+      />
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+      {
+        site.hosts.map((host) => (
+          <article
+            class="host-card p-6 rounded-2xl flex flex-col items-center text-center transition-all duration-200"
+            style="background-color: var(--bg-card); border: 1px solid var(--border);"
+          >
+            <!-- Avatar -->
+            <div class="relative mb-4">
+              {host.photo ? (
+                <img
+                  src={host.photo}
+                  alt={`Foto de ${host.name}`}
+                  width="80"
+                  height="80"
+                  class="w-20 h-20 rounded-full object-cover ring-2"
+                  style="ring-color: var(--border);"
+                />
+              ) : (
+                <div
+                  class="serif w-20 h-20 rounded-full flex items-center justify-center text-xl font-bold ring-2"
+                  style="background-color: var(--gold-dim); color: var(--gold); ring-color: var(--border);"
+                  aria-hidden="true"
+                >
+                  {getInitials(host.name)}
+                </div>
+              )}
+              <!-- Gold dot accent -->
+              <div
+                class="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center"
+                style="background-color: var(--gold); border-color: var(--bg-card);"
+                aria-hidden="true"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="currentColor" style="color: #0a0a0a;">
+                  <polygon points="5,3 19,12 5,21"/>
+                </svg>
+              </div>
+            </div>
+
+            <h3 class="text-sm font-semibold mb-0.5" style="color: var(--text-primary);">{host.name}</h3>
+            <p class="text-xs font-medium mb-3" style="color: var(--gold);">{host.role}</p>
+            <p class="text-xs leading-relaxed" style="color: var(--text-muted);">{host.bio}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .host-card:hover {
+    border-color: var(--border-hover) !important;
+    background-color: var(--bg-card-hover) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0 0 0 / 0.15);
+  }
+</style>

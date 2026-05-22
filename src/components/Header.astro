@@ -1,0 +1,252 @@
+---
+import { site } from "../config/site";
+import ThemeToggle from "./ThemeToggle.astro";
+
+const navLinks = [
+  { href: "#inicio", label: "Inicio" },
+  { href: "#acerca", label: "Acerca" },
+  { href: "#programacion", label: "Programación" },
+  { href: "#locutores", label: "Locutores" },
+  { href: "#contacto", label: "Contacto" },
+];
+---
+
+<header
+  id="site-header"
+  class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+  style="background-color: transparent;"
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 lg:h-18">
+      <!-- Logo + brand -->
+      <a
+        href="#inicio"
+        class="flex items-center gap-3 group"
+        aria-label={`${site.name} — inicio`}
+      >
+        <img
+          src="/logo.svg"
+          alt={`Isotipo ${site.name}`}
+          width="36"
+          height="36"
+          class="w-9 h-9 object-contain transition-transform duration-300 group-hover:scale-105"
+        />
+        <div class="leading-none">
+          <span
+            class="brand-name block text-sm font-semibold tracking-tight transition-colors duration-300"
+            style="color: var(--text-primary);"
+          >
+            {site.name}
+          </span>
+          <span
+            class="block text-xs font-medium"
+            style="color: var(--gold);"
+          >
+            {site.frequency}
+          </span>
+        </div>
+      </a>
+
+      <!-- Desktop nav -->
+      <nav class="hidden lg:flex items-center gap-1" aria-label="Navegación principal">
+        {
+          navLinks.map((link) => (
+            <a
+              href={link.href}
+              class="px-3 py-1.5 text-sm rounded-lg transition-colors duration-200"
+              style="color: var(--text-secondary);"
+            >
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
+
+      <!-- Right side: theme toggle + CTA -->
+      <div class="flex items-center gap-2">
+        <ThemeToggle />
+        <a
+          href="#reproductor"
+          class="hidden sm:inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200"
+          style="background-color: var(--gold); color: #0a0a0a;"
+          id="header-listen-btn"
+        >
+          <span class="relative flex h-2 w-2">
+            <span
+              class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+              style="background-color: #0a0a0a;"></span>
+            <span
+              class="relative inline-flex rounded-full h-2 w-2"
+              style="background-color: #0a0a0a;"></span>
+          </span>
+          En vivo
+        </a>
+
+        <!-- Hamburger button -->
+        <button
+          id="menu-toggle"
+          class="lg:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg border gap-1.5 transition-colors duration-200 cursor-pointer"
+          style="border-color: var(--border); color: var(--text-secondary);"
+          aria-label="Abrir menú"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+        >
+          <span id="bar1" class="block w-4.5 h-px transition-all duration-300" style="background-color: currentColor;"></span>
+          <span id="bar2" class="block w-4.5 h-px transition-all duration-300" style="background-color: currentColor;"></span>
+          <span id="bar3" class="block w-4.5 h-px transition-all duration-300" style="background-color: currentColor;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div
+    id="mobile-menu"
+    class="lg:hidden hidden"
+    style="border-top: 1px solid var(--border); background-color: var(--bg);"
+    aria-hidden="true"
+  >
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
+      {
+        navLinks.map((link) => (
+          <a
+            href={link.href}
+            class="mobile-nav-link px-4 py-3 text-sm rounded-xl transition-colors duration-200"
+            style="color: var(--text-secondary);"
+          >
+            {link.label}
+          </a>
+        ))
+      }
+      <a
+        href="#reproductor"
+        class="mt-2 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200"
+        style="background-color: var(--gold); color: #0a0a0a;"
+      >
+        <span class="relative flex h-2 w-2">
+          <span
+            class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+            style="background-color: #0a0a0a;"></span>
+          <span
+            class="relative inline-flex rounded-full h-2 w-2"
+            style="background-color: #0a0a0a;"></span>
+        </span>
+        Escuchar en vivo
+      </a>
+    </div>
+  </div>
+</header>
+
+<style>
+  header {
+    backdrop-filter: blur(0px);
+  }
+  header.scrolled {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background-color: rgba(10, 10, 10, 0.85) !important;
+    border-bottom: 1px solid var(--border);
+  }
+  :global(.light) header.scrolled {
+    background-color: rgba(250, 250, 250, 0.85) !important;
+  }
+
+  /* Fondo oscuro → texto blanco */
+  header.scrolled nav a {
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+  header.scrolled #menu-toggle {
+    color: rgba(255, 255, 255, 0.85) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+  }
+  /* Nombre de la emisora y frecuencia */
+  header.scrolled .brand-name {
+    color: #ffffff !important;
+  }
+
+  /* Fondo claro (light mode scrolled) → restaurar color oscuro */
+  :global(.light) header.scrolled nav a {
+    color: var(--text-secondary) !important;
+  }
+  :global(.light) header.scrolled #menu-toggle {
+    color: var(--text-secondary) !important;
+    border-color: var(--border) !important;
+  }
+  :global(.light) header.scrolled .brand-name {
+    color: var(--text-primary) !important;
+  }
+
+  a[href^="#"]:not(#header-listen-btn):hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+  :global(.light) a[href^="#"]:not(#header-listen-btn):hover {
+    color: var(--text-primary) !important;
+    background-color: var(--gold-dim);
+  }
+  .mobile-nav-link:hover {
+    color: var(--text-primary) !important;
+    background-color: var(--gold-dim);
+  }
+  #header-listen-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--gold-glow);
+  }
+</style>
+
+<script>
+  const header = document.getElementById("site-header");
+  const menuToggle = document.getElementById("menu-toggle");
+  const mobileMenu = document.getElementById("mobile-menu");
+  const bar1 = document.getElementById("bar1");
+  const bar2 = document.getElementById("bar2");
+  const bar3 = document.getElementById("bar3");
+
+  // Scroll effect
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 20) {
+      header?.classList.add("scrolled");
+    } else {
+      header?.classList.remove("scrolled");
+    }
+  }, { passive: true });
+
+  // Mobile menu toggle
+  let menuOpen = false;
+  menuToggle?.addEventListener("click", () => {
+    menuOpen = !menuOpen;
+    menuToggle.setAttribute("aria-expanded", String(menuOpen));
+    menuToggle.setAttribute("aria-label", menuOpen ? "Cerrar menú" : "Abrir menú");
+
+    if (menuOpen) {
+      mobileMenu?.classList.remove("hidden");
+      mobileMenu?.removeAttribute("aria-hidden");
+      // Animate to X
+      if (bar1) bar1.style.transform = "translateY(6px) rotate(45deg)";
+      if (bar2) bar2.style.opacity = "0";
+      if (bar3) bar3.style.transform = "translateY(-6px) rotate(-45deg)";
+    } else {
+      mobileMenu?.classList.add("hidden");
+      mobileMenu?.setAttribute("aria-hidden", "true");
+      // Reset
+      if (bar1) bar1.style.transform = "";
+      if (bar2) bar2.style.opacity = "";
+      if (bar3) bar3.style.transform = "";
+    }
+  });
+
+  // Close menu on nav link click
+  document.querySelectorAll(".mobile-nav-link, #mobile-menu a").forEach((link) => {
+    link.addEventListener("click", () => {
+      menuOpen = false;
+      mobileMenu?.classList.add("hidden");
+      mobileMenu?.setAttribute("aria-hidden", "true");
+      menuToggle?.setAttribute("aria-expanded", "false");
+      menuToggle?.setAttribute("aria-label", "Abrir menú");
+      if (bar1) bar1.style.transform = "";
+      if (bar2) bar2.style.opacity = "";
+      if (bar3) bar3.style.transform = "";
+    });
+  });
+</script>

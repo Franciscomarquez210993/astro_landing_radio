@@ -1,0 +1,158 @@
+---
+import SectionTitle from "./SectionTitle.astro";
+import { site, DAYS } from "../config/site";
+---
+
+<section id="programacion" class="py-24 lg:py-32 bg-grid relative">
+  <!-- Subtle section divider glow -->
+  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+    <div class="absolute inset-0" style="background: linear-gradient(to bottom, var(--bg) 0%, transparent 10%, transparent 90%, var(--bg) 100%);"></div>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <SectionTitle
+        eyebrow="Programación"
+        title="La voz de la fe, cada día"
+        subtitle="Encuentra el programa que nutre tu espíritu. Transmitimos las 24 horas, los 7 días de la semana."
+        center={true}
+      />
+    </div>
+
+    <!-- Day filter chips -->
+    <div
+      class="flex flex-wrap justify-center gap-2 mb-10"
+      role="group"
+      aria-label="Filtrar por día"
+    >
+      <button
+        class="day-chip active px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer"
+        data-day="all"
+        aria-pressed="true"
+      >
+        Todos
+      </button>
+      {
+        DAYS.map((day) => (
+          <button
+            class="day-chip px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer"
+            data-day={day}
+            aria-pressed="false"
+          >
+            {day}
+          </button>
+        ))
+      }
+    </div>
+
+    <!-- Programs grid -->
+    <div
+      id="programs-grid"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+      aria-live="polite"
+      aria-atomic="false"
+    >
+      {
+        site.programs.map((program) => (
+          <article
+            class="program-card p-5 rounded-2xl transition-all duration-200"
+            data-day={program.day}
+            style="background-color: var(--bg-card); border: 1px solid var(--border);"
+          >
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <div>
+                <span
+                  class="inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full mb-2"
+                  style="background-color: var(--gold-dim); color: var(--gold);"
+                >
+                  {program.day}
+                </span>
+                <h3 class="text-sm font-semibold leading-snug" style="color: var(--text-primary);">{program.title}</h3>
+              </div>
+              <div class="flex-shrink-0 text-right">
+                <span class="serif text-lg font-bold leading-none" style="color: var(--gold);">
+                  {program.time}
+                </span>
+              </div>
+            </div>
+            <p class="text-xs leading-relaxed mb-3" style="color: var(--text-muted);">{program.description}</p>
+            <div class="flex items-center gap-2 pt-3" style="border-top: 1px solid var(--border);">
+              <div
+                class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                style="background-color: var(--gold-dim);"
+                aria-hidden="true"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold);">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <span class="text-xs" style="color: var(--text-muted);">{program.host}</span>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+
+    <!-- No results -->
+    <p id="no-programs" class="hidden text-center py-12 text-sm" style="color: var(--text-muted);">
+      No hay programas para este día aún.
+    </p>
+  </div>
+</section>
+
+<style>
+  .day-chip {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  .day-chip:hover {
+    border-color: var(--border-hover);
+    color: var(--text-primary);
+  }
+  .day-chip.active {
+    background-color: var(--gold);
+    border-color: var(--gold);
+    color: #0a0a0a;
+  }
+  .program-card:hover {
+    border-color: var(--border-hover) !important;
+    background-color: var(--bg-card-hover) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0 0 0 / 0.15);
+  }
+</style>
+
+<script>
+  const chips = document.querySelectorAll<HTMLButtonElement>(".day-chip");
+  const cards = document.querySelectorAll<HTMLElement>(".program-card");
+  const noPrograms = document.getElementById("no-programs");
+
+  function filterByDay(day: string) {
+    let visible = 0;
+
+    cards.forEach((card) => {
+      const cardDay = card.dataset.day ?? "";
+      const show = day === "all" || cardDay === day;
+      card.style.display = show ? "" : "none";
+      if (show) visible++;
+    });
+
+    if (noPrograms) {
+      noPrograms.classList.toggle("hidden", visible > 0);
+    }
+  }
+
+  chips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      chips.forEach((c) => {
+        c.classList.remove("active");
+        c.setAttribute("aria-pressed", "false");
+      });
+      chip.classList.add("active");
+      chip.setAttribute("aria-pressed", "true");
+      filterByDay(chip.dataset.day ?? "all");
+    });
+  });
+</script>

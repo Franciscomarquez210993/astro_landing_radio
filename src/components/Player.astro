@@ -1,0 +1,390 @@
+---
+import { site } from "../config/site";
+---
+
+<!--
+  Player island — interactive audio player.
+  - States: idle | loading | playing | error
+  - Volume persisted in localStorage
+  - Sticky mini-player appears on mobile when hero scrolls out
+-->
+
+<!-- Main player card (desktop inside Hero, mobile standalone) -->
+<div
+  id="main-player"
+  class="player-card rounded-2xl p-6 w-full max-w-sm"
+  style="background-color: var(--bg-card); border: 1px solid var(--border);"
+  role="region"
+  aria-label="Reproductor de radio"
+>
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-5">
+    <div class="flex items-center gap-3">
+      <div class="relative w-10 h-10 rounded-xl overflow-hidden flex-shrink-0" style="background-color: var(--gold-dim);">
+        <img src="/logo.svg" alt="" width="40" height="40" class="w-full h-full object-contain p-1.5" aria-hidden="true" />
+      </div>
+      <div>
+        <p class="text-sm font-semibold leading-tight" style="color: var(--text-primary);">{site.name}</p>
+        <p class="text-xs" style="color: var(--text-muted);">{site.frequency}</p>
+      </div>
+    </div>
+
+    <!-- Live badge -->
+    <div
+      id="live-badge"
+      class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+      style="background-color: var(--gold-dim); color: var(--gold);"
+    >
+      <span id="live-dot" class="w-1.5 h-1.5 rounded-full" style="background-color: var(--gold);"></span>
+      <span id="live-label">EN VIVO</span>
+    </div>
+  </div>
+
+  <!-- Status message -->
+  <div id="player-status" class="text-xs text-center mb-4 min-h-4" style="color: var(--text-muted);" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Controls -->
+  <div class="flex items-center gap-4">
+    <!-- Play/Pause button -->
+    <button
+      id="play-btn"
+      class="play-btn flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer"
+      style="background-color: var(--gold); color: #0a0a0a;"
+      aria-label="Reproducir"
+    >
+      <!-- Play icon -->
+      <svg id="icon-play" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <polygon points="5,3 19,12 5,21"></polygon>
+      </svg>
+      <!-- Pause icon -->
+      <svg id="icon-pause" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="hidden" aria-hidden="true">
+        <rect x="6" y="4" width="4" height="16"></rect>
+        <rect x="14" y="4" width="4" height="16"></rect>
+      </svg>
+      <!-- Loading spinner -->
+      <svg id="icon-loading" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="hidden animate-spin" aria-hidden="true">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+      </svg>
+    </button>
+
+    <!-- Volume controls -->
+    <div class="flex items-center gap-2 flex-1 min-w-0">
+      <!-- Mute toggle -->
+      <button
+        id="mute-btn"
+        class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-200 cursor-pointer"
+        style="color: var(--text-muted);"
+        aria-label="Silenciar"
+      >
+        <svg id="icon-volume" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+        <svg id="icon-mute" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden" aria-hidden="true">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <line x1="23" y1="9" x2="17" y2="15"></line>
+          <line x1="17" y1="9" x2="23" y2="15"></line>
+        </svg>
+      </button>
+
+      <!-- Volume slider -->
+      <input
+        id="volume-slider"
+        type="range"
+        min="0"
+        max="100"
+        value="80"
+        class="volume-slider flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
+        aria-label="Volumen"
+        style="accent-color: var(--gold);"
+      />
+    </div>
+  </div>
+
+  <!-- Error retry -->
+  <div id="error-msg" class="hidden mt-4 p-3 rounded-xl text-xs text-center" style="background-color: rgba(239,68,68,0.1); color: #f87171;">
+    <p>No se pudo conectar al stream.</p>
+    <button id="retry-btn" class="mt-1 font-semibold underline cursor-pointer" style="color: #fca5a5;">Reintentar</button>
+  </div>
+</div>
+
+<!-- Sticky mini-player (appears on mobile/scroll) -->
+<div
+  id="mini-player"
+  class="fixed bottom-0 left-0 right-0 z-40 transform translate-y-full transition-transform duration-300 lg:hidden"
+  style="background-color: var(--bg-card); border-top: 1px solid var(--border);"
+  role="region"
+  aria-label="Mini reproductor de radio"
+  aria-hidden="true"
+>
+  <div class="max-w-lg mx-auto px-4 py-3 flex items-center gap-3">
+    <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0" style="background-color: var(--gold-dim);">
+      <img src="/logo.svg" alt="" width="32" height="32" class="w-full h-full object-contain p-1" aria-hidden="true" />
+    </div>
+    <div class="flex-1 min-w-0">
+      <p class="text-xs font-semibold truncate" style="color: var(--text-primary);">{site.name}</p>
+      <p id="mini-status" class="text-xs truncate" style="color: var(--text-muted);">Toca para escuchar</p>
+    </div>
+    <div id="mini-live" class="hidden items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium" style="background-color: var(--gold-dim); color: var(--gold);">
+      <span class="mini-live-dot w-1.5 h-1.5 rounded-full" style="background-color: var(--gold);"></span>
+      EN VIVO
+    </div>
+    <button
+      id="mini-play-btn"
+      class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer"
+      style="background-color: var(--gold); color: #0a0a0a;"
+      aria-label="Reproducir en mini reproductor"
+    >
+      <svg id="mini-icon-play" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <polygon points="5,3 19,12 5,21"></polygon>
+      </svg>
+      <svg id="mini-icon-pause" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="hidden" aria-hidden="true">
+        <rect x="6" y="4" width="4" height="16"></rect>
+        <rect x="14" y="4" width="4" height="16"></rect>
+      </svg>
+      <svg id="mini-icon-loading" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="hidden animate-spin" aria-hidden="true">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<audio
+  id="radio-audio"
+  preload="none"
+  data-src={site.streamUrl}
+  data-format={site.streamFormat}
+  aria-hidden="true"
+></audio>
+
+<style>
+  .volume-slider::-webkit-slider-runnable-track {
+    background: var(--border-hover);
+    border-radius: 4px;
+    height: 6px;
+  }
+  .volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--gold);
+    margin-top: -4px;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .volume-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+  .volume-slider::-moz-range-track {
+    background: var(--border-hover);
+    border-radius: 4px;
+    height: 6px;
+  }
+  .volume-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: none;
+    cursor: pointer;
+  }
+  .play-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px var(--gold-glow);
+  }
+  .play-btn:active {
+    transform: scale(0.98);
+  }
+  #mute-btn:hover {
+    color: var(--text-primary) !important;
+  }
+</style>
+
+<script>
+  type PlayerState = "idle" | "loading" | "playing" | "error";
+
+  const audio = document.getElementById("radio-audio") as HTMLAudioElement;
+  const streamSrc = audio?.dataset.src ?? "";
+
+  // Main player elements
+  const playBtn = document.getElementById("play-btn") as HTMLButtonElement;
+  const muteBtn = document.getElementById("mute-btn") as HTMLButtonElement;
+  const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement;
+  const iconPlay = document.getElementById("icon-play");
+  const iconPause = document.getElementById("icon-pause");
+  const iconLoading = document.getElementById("icon-loading");
+  const iconVolume = document.getElementById("icon-volume");
+  const iconMute = document.getElementById("icon-mute");
+  const playerStatus = document.getElementById("player-status");
+  const errorMsg = document.getElementById("error-msg");
+  const retryBtn = document.getElementById("retry-btn");
+  const liveBadge = document.getElementById("live-badge");
+  const liveDot = document.getElementById("live-dot");
+
+  // Mini player elements
+  const miniPlayer = document.getElementById("mini-player");
+  const miniPlayBtn = document.getElementById("mini-play-btn") as HTMLButtonElement;
+  const miniIconPlay = document.getElementById("mini-icon-play");
+  const miniIconPause = document.getElementById("mini-icon-pause");
+  const miniIconLoading = document.getElementById("mini-icon-loading");
+  const miniStatus = document.getElementById("mini-status");
+  const miniLive = document.getElementById("mini-live");
+
+  // Hero sentinel for mini player visibility
+  const heroSection = document.getElementById("inicio");
+
+  let state: PlayerState = "idle";
+  let isMuted = false;
+
+  // Restore volume from localStorage
+  const savedVolume = localStorage.getItem("radio-volume");
+  const initialVolume = savedVolume ? parseFloat(savedVolume) : 0.8;
+  if (audio) audio.volume = initialVolume;
+  if (volumeSlider) volumeSlider.value = String(Math.round(initialVolume * 100));
+
+  function setState(newState: PlayerState) {
+    state = newState;
+
+    // Icons
+    iconPlay?.classList.toggle("hidden", newState !== "idle" && newState !== "error");
+    iconPause?.classList.toggle("hidden", newState !== "playing");
+    iconLoading?.classList.toggle("hidden", newState !== "loading");
+
+    miniIconPlay?.classList.toggle("hidden", newState !== "idle" && newState !== "error");
+    miniIconPause?.classList.toggle("hidden", newState !== "playing");
+    miniIconLoading?.classList.toggle("hidden", newState !== "loading");
+
+    // ARIA labels
+    const playLabel =
+      newState === "playing" ? "Pausar" :
+      newState === "loading" ? "Cargando..." :
+      "Reproducir";
+    playBtn?.setAttribute("aria-label", playLabel);
+    miniPlayBtn?.setAttribute("aria-label", playLabel);
+    playBtn.disabled = newState === "loading";
+    miniPlayBtn.disabled = newState === "loading";
+
+    // Status text
+    const statusText =
+      newState === "loading" ? "Conectando al stream..." :
+      newState === "playing" ? "Transmitiendo en vivo" :
+      newState === "error" ? "" :
+      "Toca play para escuchar";
+
+    if (playerStatus) playerStatus.textContent = statusText;
+    if (miniStatus) miniStatus.textContent =
+      newState === "loading" ? "Conectando..." :
+      newState === "playing" ? "En vivo" :
+      "Toca para escuchar";
+
+    // Error panel
+    errorMsg?.classList.toggle("hidden", newState !== "error");
+
+    // Live badge pulse
+    if (newState === "playing") {
+      liveDot?.classList.add("animate-ping");
+      liveBadge?.style.setProperty("opacity", "1");
+      miniLive?.classList.remove("hidden");
+      miniLive?.classList.add("flex");
+    } else {
+      liveDot?.classList.remove("animate-ping");
+      miniLive?.classList.add("hidden");
+      miniLive?.classList.remove("flex");
+    }
+  }
+
+  function play() {
+    if (!audio) return;
+    setState("loading");
+    // Always reload the src for live streams to avoid stale buffer
+    audio.src = streamSrc;
+    audio.load();
+    audio.play().catch(() => setState("error"));
+  }
+
+  function pause() {
+    if (!audio) return;
+    audio.pause();
+    audio.src = "";
+    setState("idle");
+  }
+
+  function togglePlay() {
+    if (state === "idle" || state === "error") {
+      play();
+    } else if (state === "playing") {
+      pause();
+    }
+  }
+
+  // Audio events
+  audio?.addEventListener("canplay", () => {
+    if (state === "loading") setState("playing");
+  });
+  audio?.addEventListener("playing", () => setState("playing"));
+  audio?.addEventListener("waiting", () => {
+    if (state === "playing") setState("loading");
+  });
+  audio?.addEventListener("error", () => setState("error"));
+  audio?.addEventListener("stalled", () => {
+    if (state === "playing") setState("error");
+  });
+
+  // Button events
+  playBtn?.addEventListener("click", togglePlay);
+  miniPlayBtn?.addEventListener("click", togglePlay);
+  retryBtn?.addEventListener("click", () => play());
+
+  // Volume
+  volumeSlider?.addEventListener("input", () => {
+    const vol = parseInt(volumeSlider.value) / 100;
+    if (audio) audio.volume = vol;
+    localStorage.setItem("radio-volume", String(vol));
+
+    if (vol === 0) {
+      isMuted = true;
+      iconVolume?.classList.add("hidden");
+      iconMute?.classList.remove("hidden");
+    } else {
+      isMuted = false;
+      iconVolume?.classList.remove("hidden");
+      iconMute?.classList.add("hidden");
+    }
+  });
+
+  muteBtn?.addEventListener("click", () => {
+    isMuted = !isMuted;
+    if (audio) audio.muted = isMuted;
+    iconVolume?.classList.toggle("hidden", isMuted);
+    iconMute?.classList.toggle("hidden", !isMuted);
+    muteBtn.setAttribute("aria-label", isMuted ? "Activar sonido" : "Silenciar");
+  });
+
+  // Mini player visibility via IntersectionObserver
+  if (heroSection && miniPlayer) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (!entry.isIntersecting) {
+          miniPlayer.classList.remove("translate-y-full");
+          miniPlayer.removeAttribute("aria-hidden");
+        } else {
+          miniPlayer.classList.add("translate-y-full");
+          miniPlayer.setAttribute("aria-hidden", "true");
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(heroSection);
+  }
+
+  // Init state display
+  setState("idle");
+
+  // External trigger from Hero CTA
+  document.addEventListener("radio:play", () => {
+    if (state === "idle" || state === "error") play();
+  });
+</script>

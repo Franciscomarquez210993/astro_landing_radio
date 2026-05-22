@@ -1,0 +1,151 @@
+---
+import { site } from "../config/site";
+import Player from "./Player.astro";
+---
+
+<section
+  id="inicio"
+  class="relative min-h-screen flex items-center pt-16 overflow-hidden"
+>
+  <!-- Background gradient & watermark -->
+  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+    <!-- Radial gold glow -->
+    <div
+      class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl"
+      style="background: radial-gradient(circle, rgba(233,179,58,0.12) 0%, transparent 70%);"
+    ></div>
+    <!-- Grid pattern -->
+    <div class="absolute inset-0 bg-grid opacity-60"></div>
+    <!-- Logo watermark -->
+    <div
+      class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/4 w-80 h-80 lg:w-[500px] lg:h-[500px] opacity-[0.04]"
+    >
+      <img
+        src="/logo.svg"
+        alt=""
+        class="w-full h-full object-contain"
+        aria-hidden="true"
+      />
+    </div>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20 lg:py-28">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <!-- Left: content -->
+      <div class="max-w-xl">
+        <!-- Badge -->
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6"
+          style="background-color: var(--gold-dim); color: var(--gold); border: 1px solid rgba(233,179,58,0.25);"
+        >
+          <span class="relative flex h-2 w-2">
+            <span
+              class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+              style="background-color: var(--gold);"></span>
+            <span
+              class="relative inline-flex rounded-full h-2 w-2"
+              style="background-color: var(--gold);"></span>
+          </span>
+          En vivo — {site.frequency}
+        </div>
+
+        <!-- Headline -->
+        <h1
+          class="text-5xl sm:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tight mb-5"
+          style="color: var(--text-primary);"
+        >
+          {site.name}
+        </h1>
+
+        <!-- Subhead -->
+        <p
+          class="text-lg sm:text-xl leading-relaxed mb-8"
+          style="color: var(--text-secondary);"
+        >
+          {site.tagline}
+        </p>
+        <p
+          class="text-base leading-relaxed mb-10"
+          style="color: var(--text-muted);"
+        >
+          {site.description}
+        </p>
+
+        <!-- CTAs -->
+        <div class="flex flex-wrap gap-3 mb-12">
+          <button
+            id="hero-play-btn"
+            class="hero-cta-primary inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer"
+            style="background-color: var(--gold); color: #0a0a0a;"
+            aria-label="Escuchar radio en vivo"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <polygon points="5,3 19,12 5,21"></polygon>
+            </svg>
+            Escuchar ahora
+          </button>
+          <a
+            href="#programacion"
+            class="hero-cta-secondary inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200"
+            style="color: var(--text-primary); border: 1px solid var(--border);"
+          >
+            Ver programación
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12,5 19,12 12,19"></polyline>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Stats row (Astrolify-style) -->
+        <div
+          class="flex flex-wrap items-center gap-x-6 gap-y-3 pt-6"
+          style="border-top: 1px solid var(--border);"
+        >
+          <div class="flex items-center gap-2">
+            <span class="serif text-xl font-bold" style="color: var(--gold);">24/7</span>
+            <span class="text-xs" style="color: var(--text-muted);">En vivo</span>
+          </div>
+          <span class="hidden sm:block w-px h-5" style="background-color: var(--border);"></span>
+          <div class="flex items-center gap-2">
+            <span class="serif text-xl font-bold" style="color: var(--gold);">98.1</span>
+            <span class="text-xs" style="color: var(--text-muted);">FM</span>
+          </div>
+          <span class="hidden sm:block w-px h-5" style="background-color: var(--border);"></span>
+          <div class="flex items-center gap-2">
+            <span class="serif text-xl font-bold" style="color: var(--gold);">HD</span>
+            <span class="text-xs" style="color: var(--text-muted);">Streaming</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Player -->
+      <div id="reproductor" class="flex justify-center lg:justify-end">
+        <Player />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero-cta-primary:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px var(--gold-glow);
+  }
+  .hero-cta-secondary:hover {
+    border-color: var(--border-hover) !important;
+    background-color: var(--bg-card);
+  }
+</style>
+
+<script>
+  document.getElementById("hero-play-btn")?.addEventListener("click", () => {
+    // Trigger play on the Player component
+    document.dispatchEvent(new CustomEvent("radio:play"));
+    // Scroll to player card on mobile
+    if (window.innerWidth < 1024) {
+      document.getElementById("reproductor")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  });
+</script>
