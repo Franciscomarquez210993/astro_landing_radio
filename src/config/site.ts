@@ -117,7 +117,7 @@ export const site = {
     },
     {
       day: "Viernes",
-      time: "19:00",
+      time: "18:23",
       title: "Concierto Sacro",
       host: "Producción",
       description: "Una hora de música sacra contemporánea y clásica.",
@@ -145,7 +145,7 @@ export const site = {
     },
     {
       day: "Domingo",
-      time: "18:00",
+      time: "18:19",
       title: "Vísperas",
       host: "Coro Lumen Fidei",
       description: "Cierre del día con la oración vespertina cantada.",

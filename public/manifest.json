@@ -1,0 +1,26 @@
+{
+  "name": "Lumen Fidei Radio 98.1 FM",
+  "short_name": "Lumen Fidei",
+  "description": "La luz de la fe que ilumina tus días. Música sacra, formación y oración las 24 horas.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#f1c40f",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["music", "entertainment", "lifestyle"],
+  "lang": "es"
+}

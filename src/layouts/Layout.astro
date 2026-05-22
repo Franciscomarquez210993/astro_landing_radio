@@ -56,8 +56,15 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "https://lumenfid
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
 
+    <!-- PWA manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
     <!-- Theme color -->
     <meta name="theme-color" content="#0a0a0a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Lumen Fidei" />
 
     <!-- Inline theme init to prevent FOUC — default: dark -->
     <script is:inline>
@@ -72,6 +79,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "https://lumenfid
   <body>
     <slot />
     <script>
+      // ── Scroll-reveal ──────────────────────────────────────────────────────
       const revealObserver = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
@@ -84,6 +92,21 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "https://lumenfid
         { threshold: 0.12 }
       );
       document.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el));
+
+      // ── Service Worker registration ────────────────────────────────────────
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("/sw.js", { scope: "/" })
+          .then((reg) => {
+            console.log("[SW] Registered, scope:", reg.scope);
+          })
+          .catch((err) => console.warn("[SW] Registration failed:", err));
+
+        // Keepalive ping every 30 s: wakes the SW so it can check for due notifications
+        setInterval(() => {
+          navigator.serviceWorker.controller?.postMessage({ type: "PING" });
+        }, 30_000);
+      }
     </script>
   </body>
 </html>

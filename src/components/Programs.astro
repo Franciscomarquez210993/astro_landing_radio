@@ -254,139 +254,92 @@ import { site, DAYS } from "../config/site";
     Jueves: 4, Viernes: 5, Sábado: 6,
   };
 
-  const DAY_LABEL: Record<string, string> = {
-    Lunes: "el lunes", Martes: "el martes", Miércoles: "el miércoles",
-    Jueves: "el jueves", Viernes: "el viernes", Sábado: "el sábado",
-    Domingo: "el domingo",
-  };
-
   function nextOccurrence(day: string, time: string): Date {
     const [h, m] = time.split(":").map(Number);
-    const now = new Date();
+    const now    = new Date();
     const target = new Date();
     target.setHours(h, m, 0, 0);
 
-    const todayNum = now.getDay();
+    const todayNum  = now.getDay();
     const targetNum = DAY_NUM[day] ?? 0;
-    let daysUntil = (targetNum - todayNum + 7) % 7;
-
-    // Same day but time already passed → next week
+    let daysUntil   = (targetNum - todayNum + 7) % 7;
     if (daysUntil === 0 && target <= now) daysUntil = 7;
-
     target.setDate(target.getDate() + daysUntil);
     return target;
   }
 
   function formatNextDate(date: Date): string {
-    const now = new Date();
-    const diffDays = Math.round((date.getTime() - now.getTime()) / 86400000);
+    const now     = new Date();
+    const diffMs  = date.getTime() - now.getTime();
+    const diffDay = Math.round(diffMs / 86_400_000);
     const timeStr = date.toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" });
-
-    if (diffDays === 0) return `Hoy a las ${timeStr}`;
-    if (diffDays === 1) return `Mañana a las ${timeStr}`;
-    const dayName = date.toLocaleDateString("es", { weekday: "long" });
-    return `El ${dayName} a las ${timeStr}`;
-  }
-
-  // ── Persistence ───────────────────────────────────────────────────────────
-  interface ScheduledNotif {
-    key: string;       // "day|time|title"
-    title: string;
-    day: string;
-    time: string;
-    targetMs: number;
-  }
-
-  const STORAGE_KEY = "lumen-notifs";
-
-  function loadScheduled(): ScheduledNotif[] {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
-    } catch {
-      return [];
-    }
-  }
-
-  function saveScheduled(list: ScheduledNotif[]) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    if (diffDay === 0) return `Hoy a las ${timeStr}`;
+    if (diffDay === 1) return `Mañana a las ${timeStr}`;
+    return `El ${date.toLocaleDateString("es", { weekday: "long" })} a las ${timeStr}`;
   }
 
   function notifKey(day: string, time: string, title: string) {
     return `${day}|${time}|${title}`;
   }
 
+  // ── Service Worker helpers ────────────────────────────────────────────────
+
+  function getSW(): ServiceWorker | null {
+    return navigator.serviceWorker?.controller ?? null;
+  }
+
+  // Local cache of scheduled keys (synced from SW on load)
+  let scheduledKeys = new Set<string>();
+
+  async function syncFromSW(): Promise<void> {
+    const sw = getSW();
+    if (!sw) return;
+    return new Promise((resolve) => {
+      const ch = new MessageChannel();
+      ch.port1.onmessage = (e) => {
+        if (e.data?.type === "ALL") {
+          scheduledKeys = new Set((e.data.data ?? []).map((n: { key: string }) => n.key));
+          resolve();
+        }
+      };
+      sw.postMessage({ type: "GET_ALL" }, [ch.port2]);
+      // Fallback timeout
+      setTimeout(resolve, 500);
+    });
+  }
+
   function isScheduled(day: string, time: string, title: string): boolean {
-    return loadScheduled().some((n) => n.key === notifKey(day, time, title));
+    return scheduledKeys.has(notifKey(day, time, title));
   }
 
-  function scheduleNotification(title: string, day: string, time: string, targetDate: Date) {
+  function swSchedule(title: string, day: string, time: string, targetDate: Date) {
     const key = notifKey(day, time, title);
-    const delayMs = targetDate.getTime() - Date.now();
-
-    setTimeout(() => {
-      if (Notification.permission === "granted") {
-        new Notification(`🔔 ${title} — Lumen Fidei Radio`, {
-          body: `¡${title} está comenzando ahora! ${time} hs`,
-          icon: "/logo.png",
-          badge: "/logo.png",
-          tag: key,
-        });
-      }
-      // Remove from storage after firing; reschedule for next week
-      const list = loadScheduled().filter((n) => n.key !== key);
-      saveScheduled(list);
-      markCards();
-    }, Math.max(delayMs, 0));
-
-    const list = loadScheduled().filter((n) => n.key !== key);
-    list.push({ key, title, day, time, targetMs: targetDate.getTime() });
-    saveScheduled(list);
+    const notification = { key, title, day, time, targetMs: targetDate.getTime() };
+    getSW()?.postMessage({ type: "SCHEDULE", notification });
+    scheduledKeys.add(key);
   }
 
-  function cancelNotification(day: string, time: string, title: string) {
+  function swCancel(day: string, time: string, title: string) {
     const key = notifKey(day, time, title);
-    const list = loadScheduled().filter((n) => n.key !== key);
-    saveScheduled(list);
-  }
-
-  // Restore timeouts after page reload
-  function restorePending() {
-    const now = Date.now();
-    const valid: ScheduledNotif[] = [];
-    for (const notif of loadScheduled()) {
-      if (notif.targetMs > now) {
-        scheduleNotification(notif.title, notif.day, notif.time, new Date(notif.targetMs));
-        valid.push(notif);
-      }
-    }
-    // Clean expired ones
-    saveScheduled(valid);
+    getSW()?.postMessage({ type: "CANCEL", key });
+    scheduledKeys.delete(key);
   }
 
   // ── UI: mark notified cards & buttons ────────────────────────────────────
   function markCards() {
-    const scheduled = loadScheduled();
     document.querySelectorAll<HTMLElement>(".program-card").forEach((card) => {
-      const k = notifKey(
-        card.dataset.day ?? "",
-        card.dataset.time ?? "",
-        card.dataset.title ?? ""
-      );
-      const active = scheduled.some((n) => n.key === k);
+      const k      = notifKey(card.dataset.day ?? "", card.dataset.time ?? "", card.dataset.title ?? "");
+      const active = scheduledKeys.has(k);
       card.classList.toggle("notified", active);
       const btn = card.querySelector<HTMLElement>(".notify-btn");
-      btn?.classList.toggle("active", active);
-      if (btn) {
-        const label = btn.querySelector(".notify-btn-label");
-        if (label) label.textContent = active ? "Activado" : "Notifícame";
-        btn.setAttribute(
-          "aria-label",
-          active
-            ? `Cancelar notificación de ${card.dataset.title}`
-            : `Activar notificación para ${card.dataset.title}`
-        );
-        btn.title = active ? "Cancelar aviso" : "Notificarme cuando comience";
-      }
+      if (!btn) return;
+      btn.classList.toggle("active", active);
+      const label = btn.querySelector(".notify-btn-label");
+      if (label) label.textContent = active ? "Activado" : "Notifícame";
+      btn.setAttribute("aria-label",
+        active ? `Cancelar notificación de ${card.dataset.title}` : `Activar notificación para ${card.dataset.title}`
+      );
+      btn.title = active ? "Cancelar aviso" : "Notificarme cuando comience";
     });
   }
 
@@ -427,14 +380,10 @@ import { site, DAYS } from "../config/site";
       btnConfirm.style.color = "#0a0a0a";
       btnConfirm.style.border = "none";
     }
-
     modal.showModal();
   }
 
-  function closeModal() {
-    modal.close();
-    activeCard = null;
-  }
+  function closeModal() { modal.close(); activeCard = null; }
 
   function showStatus(msg: string, isError = false) {
     modalStatus.textContent = msg;
@@ -446,11 +395,7 @@ import { site, DAYS } from "../config/site";
 
   btnClose.addEventListener("click", closeModal);
   btnCancel.addEventListener("click", closeModal);
-
-  // Close on backdrop click
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) closeModal();
-  });
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
 
   btnConfirm.addEventListener("click", async () => {
     if (!activeCard) return;
@@ -458,50 +403,46 @@ import { site, DAYS } from "../config/site";
 
     // Already scheduled → cancel
     if (isScheduled(day, time, title)) {
-      cancelNotification(day, time, title);
+      swCancel(day, time, title);
       markCards();
       showStatus("Aviso cancelado.", false);
       setTimeout(closeModal, 1500);
       return;
     }
 
-    // Request permission if needed
-    if (!("Notification" in window)) {
+    // Check SW support
+    if (!("serviceWorker" in navigator) || !("Notification" in window)) {
       showStatus("Tu navegador no soporta notificaciones.", true);
       return;
     }
 
+    // Ensure SW is ready
+    const swReg = await navigator.serviceWorker.ready;
+    if (!swReg) {
+      showStatus("El servicio de notificaciones no está listo. Recarga la página.", true);
+      return;
+    }
+
+    // Request permission
     let permission = Notification.permission;
     if (permission === "default") {
       permission = await Notification.requestPermission();
     }
-
     if (permission === "denied") {
       showStatus("Bloqueaste las notificaciones. Actívalas en la configuración de tu navegador.", true);
       return;
     }
 
     const nextDate = nextOccurrence(day, time);
-    scheduleNotification(title, day, time, nextDate);
+    swSchedule(title, day, time, nextDate);
     markCards();
-    showStatus(`¡Listo! Te avisaremos el ${formatNextDate(nextDate).toLowerCase()}.`, false);
+    showStatus(`¡Listo! Te avisaremos ${formatNextDate(nextDate).toLowerCase()}.`, false);
     setTimeout(closeModal, 2000);
   });
 
-  // ── Init ─────────────────────────────────────────────────────────────────
-  // Open modal only from the bell button
-  document.querySelectorAll<HTMLElement>(".notify-btn").forEach((btn) => {
-    const card = btn.closest<HTMLElement>(".program-card");
-    if (!card) return;
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      openModal(card);
-    });
-  });
-
-  // Day filter chips
-  const chips = document.querySelectorAll<HTMLButtonElement>(".day-chip");
-  const cards = document.querySelectorAll<HTMLElement>(".program-card");
+  // ── Day filter ────────────────────────────────────────────────────────────
+  const chips      = document.querySelectorAll<HTMLButtonElement>(".day-chip");
+  const cards      = document.querySelectorAll<HTMLElement>(".program-card");
   const noPrograms = document.getElementById("no-programs");
 
   function filterByDay(day: string) {
@@ -523,7 +464,26 @@ import { site, DAYS } from "../config/site";
     });
   });
 
-  // Restore and mark on load
-  if (Notification.permission === "granted") restorePending();
-  markCards();
+  // ── Bell buttons ──────────────────────────────────────────────────────────
+  document.querySelectorAll<HTMLElement>(".notify-btn").forEach((btn) => {
+    const card = btn.closest<HTMLElement>(".program-card");
+    if (!card) return;
+    btn.addEventListener("click", (e) => { e.stopPropagation(); openModal(card); });
+  });
+
+  // ── Init: sync state from SW then mark cards ──────────────────────────────
+  (async () => {
+    // Wait for SW to be ready (may take a few ms on first load)
+    if ("serviceWorker" in navigator) {
+      await navigator.serviceWorker.ready.catch(() => {});
+      await syncFromSW();
+    }
+    markCards();
+  })();
+
+  // Also listen for SW messages (e.g. after a SCHEDULE/CANCEL reply)
+  navigator.serviceWorker?.addEventListener("message", (e) => {
+    if (e.data?.type === "SCHEDULED") scheduledKeys.add(e.data.key);
+    if (e.data?.type === "CANCELLED") scheduledKeys.delete(e.data.key);
+  });
 </script>
