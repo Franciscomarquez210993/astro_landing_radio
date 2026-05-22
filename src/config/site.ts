@@ -131,7 +131,7 @@ export const site = {
     },
     {
       day: "Sábado",
-      time: "16:00",
+      time: "17:50",
       title: "La Hora Santa",
       host: "Comunidad",
       description: "Adoración eucarística y oraciones de reparación.",

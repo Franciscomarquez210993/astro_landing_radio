@@ -26,6 +26,7 @@ const navLinks = [
             alt="Logo Lumen Fidei Radio"
             width="40"
             height="40"
+            loading="lazy"
             class="w-10 h-10 object-contain transition-transform duration-300 group-hover:scale-105"
           />
           <div class="leading-none">
@@ -194,9 +195,15 @@ const navLinks = [
       <p class="text-xs" style="color: var(--text-muted);">
         © {currentYear} {site.name}. Todos los derechos reservados.
       </p>
-      <p class="text-xs" style="color: var(--text-muted);">
-        Hecho con fe · {site.frequency}
-      </p>
+      <a
+        href="https://biglee.io"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-xs transition-colors duration-200"
+        style="color: var(--text-muted);"
+      >
+        Desarrollado por <span style="color: var(--gold);">biglee.io</span>
+      </a>
     </div>
   </div>
 </footer>

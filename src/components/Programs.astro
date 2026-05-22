@@ -14,7 +14,7 @@ import { site, DAYS } from "../config/site";
       <SectionTitle
         eyebrow="Programación"
         title="La voz de la fe, cada día"
-        subtitle="Encuentra el programa que nutre tu espíritu. Transmitimos las 24 horas, los 7 días de la semana."
+        subtitle="Encuentra el programa que nutre tu espíritu. Toca una tarjeta para que te avisemos cuando comience."
         center={true}
       />
     </div>
@@ -57,6 +57,9 @@ import { site, DAYS } from "../config/site";
           <article
             class="program-card p-5 rounded-2xl transition-all duration-200"
             data-day={program.day}
+            data-time={program.time}
+            data-title={program.title}
+            data-host={program.host}
             style="background-color: var(--bg-card); border: 1px solid var(--border);"
           >
             <div class="flex items-start justify-between gap-3 mb-3">
@@ -69,25 +72,45 @@ import { site, DAYS } from "../config/site";
                 </span>
                 <h3 class="text-sm font-semibold leading-snug" style="color: var(--text-primary);">{program.title}</h3>
               </div>
-              <div class="flex-shrink-0 text-right">
+              <div class="flex-shrink-0">
                 <span class="serif text-lg font-bold leading-none" style="color: var(--gold);">
                   {program.time}
                 </span>
               </div>
             </div>
             <p class="text-xs leading-relaxed mb-3" style="color: var(--text-muted);">{program.description}</p>
-            <div class="flex items-center gap-2 pt-3" style="border-top: 1px solid var(--border);">
-              <div
-                class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                style="background-color: var(--gold-dim);"
-                aria-hidden="true"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold);">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
+            <div class="flex items-center justify-between gap-2 pt-3" style="border-top: 1px solid var(--border);">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                  style="background-color: var(--gold-dim);"
+                  aria-hidden="true"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold);">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                </div>
+                <span class="text-xs" style="color: var(--text-muted);">{program.host}</span>
               </div>
-              <span class="text-xs" style="color: var(--text-muted);">{program.host}</span>
+
+              <!-- Notification bell button -->
+              <button
+                class="notify-btn flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer flex-shrink-0"
+                style="border: 1px solid var(--border); color: var(--text-muted);"
+                aria-label={`Activar notificación para ${program.title}`}
+                title="Notificarme cuando comience"
+              >
+                <svg class="bell-outline" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                <svg class="bell-filled hidden" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0" aria-hidden="true">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                <span class="notify-btn-label">Notifícame</span>
+              </button>
             </div>
           </article>
         ))
@@ -100,6 +123,68 @@ import { site, DAYS } from "../config/site";
     </p>
   </div>
 </section>
+
+<!-- Notification modal -->
+<dialog
+  id="notify-modal"
+  class="rounded-2xl p-0 w-full max-w-sm mx-auto backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+  style="background-color: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary);"
+  aria-labelledby="modal-title"
+>
+  <div class="p-6">
+    <!-- Header -->
+    <div class="flex items-start justify-between gap-3 mb-5">
+      <div
+        class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+        style="background-color: var(--gold-dim);"
+        aria-hidden="true"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold);">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </div>
+      <button
+        id="modal-close"
+        class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-200 cursor-pointer ml-auto"
+        style="color: var(--text-muted);"
+        aria-label="Cerrar"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Program info -->
+    <h2 id="modal-title" class="text-base font-semibold mb-1" style="color: var(--text-primary);">
+      ¿Recibir notificación?
+    </h2>
+    <p id="modal-program-name" class="text-sm font-medium mb-1" style="color: var(--gold);"></p>
+    <p id="modal-next-time" class="text-xs mb-5" style="color: var(--text-muted);"></p>
+
+    <!-- Status message -->
+    <div id="modal-status" class="hidden text-xs p-3 rounded-xl mb-4 text-center"></div>
+
+    <!-- Actions -->
+    <div id="modal-actions" class="flex gap-3">
+      <button
+        id="modal-cancel"
+        class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer"
+        style="border: 1px solid var(--border); color: var(--text-secondary);"
+      >
+        Ahora no
+      </button>
+      <button
+        id="modal-confirm"
+        class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer"
+        style="background-color: var(--gold); color: #0a0a0a;"
+      >
+        Notificarme
+      </button>
+    </div>
+  </div>
+</dialog>
 
 <style>
   .day-chip {
@@ -116,43 +201,329 @@ import { site, DAYS } from "../config/site";
     border-color: var(--gold);
     color: #0a0a0a;
   }
+  .program-card {
+    cursor: default;
+  }
   .program-card:hover {
     border-color: var(--border-hover) !important;
     background-color: var(--bg-card-hover) !important;
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0 0 0 / 0.15);
   }
+  .notify-btn:hover {
+    border-color: var(--gold) !important;
+    color: var(--gold) !important;
+    background-color: var(--gold-dim);
+  }
+  .notify-btn.active {
+    border-color: var(--gold) !important;
+    background-color: var(--gold-dim) !important;
+    color: var(--gold) !important;
+  }
+  .notify-btn.active .bell-outline { display: none !important; }
+  .notify-btn.active .bell-filled  { display: block !important; }
+  .program-card.notified {
+    border-color: rgba(241 196 15 / 0.3) !important;
+  }
+
+  dialog {
+    margin: auto;
+  }
+  dialog::backdrop {
+    background: rgba(0 0 0 / 0.6);
+    backdrop-filter: blur(4px);
+  }
+  #modal-close:hover {
+    color: var(--text-primary) !important;
+    background-color: var(--bg-card-hover);
+  }
+  #modal-cancel:hover {
+    border-color: var(--border-hover) !important;
+    color: var(--text-primary) !important;
+  }
+  #modal-confirm:hover {
+    opacity: 0.9;
+    box-shadow: 0 4px 16px var(--gold-glow);
+  }
 </style>
 
 <script>
+  // ── Day mapping ───────────────────────────────────────────────────────────
+  const DAY_NUM: Record<string, number> = {
+    Domingo: 0, Lunes: 1, Martes: 2, Miércoles: 3,
+    Jueves: 4, Viernes: 5, Sábado: 6,
+  };
+
+  const DAY_LABEL: Record<string, string> = {
+    Lunes: "el lunes", Martes: "el martes", Miércoles: "el miércoles",
+    Jueves: "el jueves", Viernes: "el viernes", Sábado: "el sábado",
+    Domingo: "el domingo",
+  };
+
+  function nextOccurrence(day: string, time: string): Date {
+    const [h, m] = time.split(":").map(Number);
+    const now = new Date();
+    const target = new Date();
+    target.setHours(h, m, 0, 0);
+
+    const todayNum = now.getDay();
+    const targetNum = DAY_NUM[day] ?? 0;
+    let daysUntil = (targetNum - todayNum + 7) % 7;
+
+    // Same day but time already passed → next week
+    if (daysUntil === 0 && target <= now) daysUntil = 7;
+
+    target.setDate(target.getDate() + daysUntil);
+    return target;
+  }
+
+  function formatNextDate(date: Date): string {
+    const now = new Date();
+    const diffDays = Math.round((date.getTime() - now.getTime()) / 86400000);
+    const timeStr = date.toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" });
+
+    if (diffDays === 0) return `Hoy a las ${timeStr}`;
+    if (diffDays === 1) return `Mañana a las ${timeStr}`;
+    const dayName = date.toLocaleDateString("es", { weekday: "long" });
+    return `El ${dayName} a las ${timeStr}`;
+  }
+
+  // ── Persistence ───────────────────────────────────────────────────────────
+  interface ScheduledNotif {
+    key: string;       // "day|time|title"
+    title: string;
+    day: string;
+    time: string;
+    targetMs: number;
+  }
+
+  const STORAGE_KEY = "lumen-notifs";
+
+  function loadScheduled(): ScheduledNotif[] {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+    } catch {
+      return [];
+    }
+  }
+
+  function saveScheduled(list: ScheduledNotif[]) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+
+  function notifKey(day: string, time: string, title: string) {
+    return `${day}|${time}|${title}`;
+  }
+
+  function isScheduled(day: string, time: string, title: string): boolean {
+    return loadScheduled().some((n) => n.key === notifKey(day, time, title));
+  }
+
+  function scheduleNotification(title: string, day: string, time: string, targetDate: Date) {
+    const key = notifKey(day, time, title);
+    const delayMs = targetDate.getTime() - Date.now();
+
+    setTimeout(() => {
+      if (Notification.permission === "granted") {
+        new Notification(`🔔 ${title} — Lumen Fidei Radio`, {
+          body: `¡${title} está comenzando ahora! ${time} hs`,
+          icon: "/logo.png",
+          badge: "/logo.png",
+          tag: key,
+        });
+      }
+      // Remove from storage after firing; reschedule for next week
+      const list = loadScheduled().filter((n) => n.key !== key);
+      saveScheduled(list);
+      markCards();
+    }, Math.max(delayMs, 0));
+
+    const list = loadScheduled().filter((n) => n.key !== key);
+    list.push({ key, title, day, time, targetMs: targetDate.getTime() });
+    saveScheduled(list);
+  }
+
+  function cancelNotification(day: string, time: string, title: string) {
+    const key = notifKey(day, time, title);
+    const list = loadScheduled().filter((n) => n.key !== key);
+    saveScheduled(list);
+  }
+
+  // Restore timeouts after page reload
+  function restorePending() {
+    const now = Date.now();
+    const valid: ScheduledNotif[] = [];
+    for (const notif of loadScheduled()) {
+      if (notif.targetMs > now) {
+        scheduleNotification(notif.title, notif.day, notif.time, new Date(notif.targetMs));
+        valid.push(notif);
+      }
+    }
+    // Clean expired ones
+    saveScheduled(valid);
+  }
+
+  // ── UI: mark notified cards & buttons ────────────────────────────────────
+  function markCards() {
+    const scheduled = loadScheduled();
+    document.querySelectorAll<HTMLElement>(".program-card").forEach((card) => {
+      const k = notifKey(
+        card.dataset.day ?? "",
+        card.dataset.time ?? "",
+        card.dataset.title ?? ""
+      );
+      const active = scheduled.some((n) => n.key === k);
+      card.classList.toggle("notified", active);
+      const btn = card.querySelector<HTMLElement>(".notify-btn");
+      btn?.classList.toggle("active", active);
+      if (btn) {
+        const label = btn.querySelector(".notify-btn-label");
+        if (label) label.textContent = active ? "Activado" : "Notifícame";
+        btn.setAttribute(
+          "aria-label",
+          active
+            ? `Cancelar notificación de ${card.dataset.title}`
+            : `Activar notificación para ${card.dataset.title}`
+        );
+        btn.title = active ? "Cancelar aviso" : "Notificarme cuando comience";
+      }
+    });
+  }
+
+  // ── Modal logic ───────────────────────────────────────────────────────────
+  const modal        = document.getElementById("notify-modal") as HTMLDialogElement;
+  const modalName    = document.getElementById("modal-program-name")!;
+  const modalNext    = document.getElementById("modal-next-time")!;
+  const modalStatus  = document.getElementById("modal-status")!;
+  const modalActions = document.getElementById("modal-actions")!;
+  const btnConfirm   = document.getElementById("modal-confirm") as HTMLButtonElement;
+  const btnCancel    = document.getElementById("modal-cancel") as HTMLButtonElement;
+  const btnClose     = document.getElementById("modal-close") as HTMLButtonElement;
+
+  let activeCard: HTMLElement | null = null;
+
+  function openModal(card: HTMLElement) {
+    activeCard = card;
+    const { title = "", day = "", time = "" } = card.dataset;
+    const nextDate = nextOccurrence(day, time);
+    const already  = isScheduled(day, time, title);
+
+    modalName.textContent = title;
+    modalNext.textContent = already
+      ? `Notificación programada para ${formatNextDate(nextDate)}`
+      : `Próxima emisión: ${formatNextDate(nextDate)}`;
+
+    modalStatus.classList.add("hidden");
+    modalActions.classList.remove("hidden");
+
+    if (already) {
+      btnConfirm.textContent = "Cancelar aviso";
+      btnConfirm.style.backgroundColor = "var(--bg-card-hover)";
+      btnConfirm.style.color = "var(--text-primary)";
+      btnConfirm.style.border = "1px solid var(--border)";
+    } else {
+      btnConfirm.textContent = "Notificarme";
+      btnConfirm.style.backgroundColor = "var(--gold)";
+      btnConfirm.style.color = "#0a0a0a";
+      btnConfirm.style.border = "none";
+    }
+
+    modal.showModal();
+  }
+
+  function closeModal() {
+    modal.close();
+    activeCard = null;
+  }
+
+  function showStatus(msg: string, isError = false) {
+    modalStatus.textContent = msg;
+    modalStatus.style.backgroundColor = isError ? "rgba(239,68,68,0.1)" : "var(--gold-dim)";
+    modalStatus.style.color = isError ? "#f87171" : "var(--gold)";
+    modalStatus.classList.remove("hidden");
+    modalActions.classList.add("hidden");
+  }
+
+  btnClose.addEventListener("click", closeModal);
+  btnCancel.addEventListener("click", closeModal);
+
+  // Close on backdrop click
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  btnConfirm.addEventListener("click", async () => {
+    if (!activeCard) return;
+    const { title = "", day = "", time = "" } = activeCard.dataset;
+
+    // Already scheduled → cancel
+    if (isScheduled(day, time, title)) {
+      cancelNotification(day, time, title);
+      markCards();
+      showStatus("Aviso cancelado.", false);
+      setTimeout(closeModal, 1500);
+      return;
+    }
+
+    // Request permission if needed
+    if (!("Notification" in window)) {
+      showStatus("Tu navegador no soporta notificaciones.", true);
+      return;
+    }
+
+    let permission = Notification.permission;
+    if (permission === "default") {
+      permission = await Notification.requestPermission();
+    }
+
+    if (permission === "denied") {
+      showStatus("Bloqueaste las notificaciones. Actívalas en la configuración de tu navegador.", true);
+      return;
+    }
+
+    const nextDate = nextOccurrence(day, time);
+    scheduleNotification(title, day, time, nextDate);
+    markCards();
+    showStatus(`¡Listo! Te avisaremos el ${formatNextDate(nextDate).toLowerCase()}.`, false);
+    setTimeout(closeModal, 2000);
+  });
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+  // Open modal only from the bell button
+  document.querySelectorAll<HTMLElement>(".notify-btn").forEach((btn) => {
+    const card = btn.closest<HTMLElement>(".program-card");
+    if (!card) return;
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openModal(card);
+    });
+  });
+
+  // Day filter chips
   const chips = document.querySelectorAll<HTMLButtonElement>(".day-chip");
   const cards = document.querySelectorAll<HTMLElement>(".program-card");
   const noPrograms = document.getElementById("no-programs");
 
   function filterByDay(day: string) {
     let visible = 0;
-
     cards.forEach((card) => {
-      const cardDay = card.dataset.day ?? "";
-      const show = day === "all" || cardDay === day;
+      const show = day === "all" || card.dataset.day === day;
       card.style.display = show ? "" : "none";
       if (show) visible++;
     });
-
-    if (noPrograms) {
-      noPrograms.classList.toggle("hidden", visible > 0);
-    }
+    noPrograms?.classList.toggle("hidden", visible > 0);
   }
 
   chips.forEach((chip) => {
     chip.addEventListener("click", () => {
-      chips.forEach((c) => {
-        c.classList.remove("active");
-        c.setAttribute("aria-pressed", "false");
-      });
+      chips.forEach((c) => { c.classList.remove("active"); c.setAttribute("aria-pressed", "false"); });
       chip.classList.add("active");
       chip.setAttribute("aria-pressed", "true");
       filterByDay(chip.dataset.day ?? "all");
     });
   });
+
+  // Restore and mark on load
+  if (Notification.permission === "granted") restorePending();
+  markCards();
 </script>
