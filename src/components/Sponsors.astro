@@ -1,0 +1,332 @@
+---
+import SectionTitle from "./SectionTitle.astro";
+import { site } from "../config/site";
+
+const tierStyle: Record<string, { label: string; border: string; badge: string }> = {
+  gold:   { label: "Oro",   border: "rgba(241 196 15 / 0.5)",  badge: "rgba(241 196 15 / 0.15)" },
+  silver: { label: "Plata", border: "rgba(200 200 210 / 0.4)", badge: "rgba(200 200 210 / 0.1)"  },
+  bronze: { label: "Bronce",border: "rgba(180 120 60 / 0.4)",  badge: "rgba(180 120 60 / 0.12)"  },
+};
+
+const tierColor: Record<string, string> = {
+  gold:   "#f1c40f",
+  silver: "#c8c8d2",
+  bronze: "#b4783c",
+};
+
+const hasSponsor = site.sponsors.length > 0;
+---
+
+<section id="patrocinantes" class="py-12 lg:py-16 relative">
+  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+    <div
+      class="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] rounded-full blur-3xl opacity-30"
+      style="background: radial-gradient(circle, rgba(241 196 15 / 0.1) 0%, transparent 70%);"
+    ></div>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Section header — shown only in the full tiers block below -->
+    <!-- The logo strip at top of page uses just the label -->
+
+    <!-- ── Marquee strip ───────────────────────────────────────────────── -->
+    <div class="marquee-section mb-16">
+      <div class="flex items-center gap-6 sm:gap-10">
+
+        <!-- Left label -->
+        <div class="flex-shrink-0 max-w-[160px] hidden sm:block">
+          <p class="text-sm font-semibold leading-snug" style="color: var(--text-primary);">
+            Nuestros anunciantes
+          </p>
+          <p class="text-xs mt-1" style="color: var(--text-muted);">
+            confían en nuestra señal
+          </p>
+        </div>
+
+        <!-- Vertical divider -->
+        <div class="hidden sm:block w-px self-stretch" style="background-color: var(--border);"></div>
+
+        <!-- Scrolling track -->
+        <div class="marquee-track flex-1 overflow-hidden relative">
+          <!-- Fade edges -->
+          <div class="marquee-fade-left"></div>
+          <div class="marquee-fade-right"></div>
+
+          <!-- Items duplicated for seamless loop -->
+          <div class="marquee-inner flex items-center gap-16">
+            {/* First copy */}
+            {site.sponsors.map((sponsor) => (
+              <a
+                href={sponsor.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="marquee-item flex-shrink-0 flex items-center gap-3 group"
+                aria-label={sponsor.name}
+              >
+                {sponsor.logo ? (
+                  <img
+                    src={sponsor.logo}
+                    alt={sponsor.name}
+                    width="200"
+                    height="80"
+                    loading="lazy"
+                    class="h-24 w-auto object-contain opacity-75 group-hover:opacity-100 transition-opacity duration-300"
+                  />
+                ) : (
+                  <span class="text-base font-semibold whitespace-nowrap opacity-60 group-hover:opacity-100 transition-opacity duration-300"
+                    style="color: var(--text-primary);">{sponsor.name}</span>
+                )}
+              </a>
+            ))}
+            {/* Available slot in strip */}
+            <a
+              href={`mailto:${site.sponsorEmail}?subject=Quiero ser anunciante — Lumen Fidei Radio`}
+              class="marquee-item flex-shrink-0 flex items-center gap-2 group"
+              aria-label="Espacio disponible para tu marca"
+            >
+              <div class="flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 group-hover:opacity-100"
+                style="border: 1px dashed rgba(241 196 15 / 0.4); color: var(--text-muted); opacity: 0.6;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <span class="text-xs font-medium whitespace-nowrap">Tu marca aquí</span>
+              </div>
+            </a>
+
+            {/* Second copy — exact duplicate for seamless loop */}
+            {site.sponsors.map((sponsor) => (
+              <a
+                href={sponsor.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="marquee-item flex-shrink-0 flex items-center gap-3 group"
+                aria-label={sponsor.name}
+                aria-hidden="true"
+                tabindex="-1"
+              >
+                {sponsor.logo ? (
+                  <img
+                    src={sponsor.logo}
+                    alt=""
+                    width="140"
+                    height="48"
+                    loading="lazy"
+                    class="h-24 w-auto object-contain opacity-75 group-hover:opacity-100 transition-opacity duration-300"
+                  />
+                ) : (
+                  <span class="text-base font-semibold whitespace-nowrap opacity-60 group-hover:opacity-100 transition-opacity duration-300"
+                    style="color: var(--text-primary);">{sponsor.name}</span>
+                )}
+              </a>
+            ))}
+            <a
+              href={`mailto:${site.sponsorEmail}?subject=Quiero ser anunciante — Lumen Fidei Radio`}
+              class="marquee-item flex-shrink-0 flex items-center gap-2 group"
+              aria-hidden="true"
+              tabindex="-1"
+            >
+              <div class="flex items-center gap-2 px-4 py-2 rounded-full"
+                style="border: 1px dashed rgba(241 196 15 / 0.4); color: var(--text-muted); opacity: 0.6;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <span class="text-xs font-medium whitespace-nowrap">Tu marca aquí</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="my-12" style="border-top: 1px solid var(--border);"></div>
+
+    <!-- Full section header before tier cards -->
+    <div class="text-center mb-12 reveal">
+      <SectionTitle
+        eyebrow="Patrocinantes"
+        title="Apoya nuestra misión"
+        subtitle="Tu marca junto a una voz que llega a miles de hogares. Juntos evangelizamos a través de las ondas."
+        center={true}
+      />
+    </div>
+
+    <!-- Tier cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      {site.sponsorTiers.map((tier, i) => {
+        const tc  = tierColor[tier.id] ?? tierColor.bronze;
+        const ts  = tierStyle[tier.id]  ?? tierStyle.bronze;
+        const isGold = tier.id === "gold";
+        return (
+          <div
+            class={`tier-card relative flex flex-col p-6 rounded-2xl transition-all duration-200 reveal reveal-delay-${i + 1}`}
+            style={`background-color: var(--bg-card); border: 1px solid ${isGold ? ts.border : "var(--border)"};`}
+          >
+            {isGold && (
+              <div
+                class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-xs font-semibold"
+                style="background-color: var(--gold); color: #0a0a0a;"
+              >
+                Más popular
+              </div>
+            )}
+
+            <!-- Tier badge -->
+            <div class="flex items-center gap-2 mb-4">
+              <div
+                class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
+                style={`background-color: ${ts.badge}; color: ${tc};`}
+                aria-hidden="true"
+              >
+                ★
+              </div>
+              <span class="text-sm font-semibold" style={`color: ${tc};`}>{tier.label}</span>
+            </div>
+
+            <!-- Price -->
+            <div class="mb-2">
+              <span
+                class="text-2xl font-black"
+                style={`font-family: 'Playfair Display', Georgia, serif; color: var(--text-primary);`}
+              >
+                {tier.price.split(" / ")[0]}
+              </span>
+              <span class="text-xs ml-1" style="color: var(--text-muted);">/ mes</span>
+            </div>
+
+            <p class="text-xs leading-relaxed mb-5" style="color: var(--text-muted);">{tier.description}</p>
+
+            <!-- Perks -->
+            <ul class="flex flex-col gap-2 mb-6 flex-1">
+              {tier.perks.map((perk) => (
+                <li class="flex items-start gap-2 text-xs" style="color: var(--text-secondary);">
+                  <svg
+                    class="flex-shrink-0 mt-0.5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    style={`color: ${tc};`}
+                    aria-hidden="true"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  {perk}
+                </li>
+              ))}
+            </ul>
+
+            <!-- CTA -->
+            <a
+              href={`mailto:${site.sponsorEmail}?subject=Consulta patrocinio ${tier.label} — Lumen Fidei Radio`}
+              class="tier-cta block text-center py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
+              style={isGold
+                ? `background-color: var(--gold); color: #0a0a0a;`
+                : `border: 1px solid var(--border); color: var(--text-primary);`}
+            >
+              Consultar espacio
+            </a>
+          </div>
+        );
+      })}
+    </div>
+
+    <!-- Bottom CTA banner -->
+    <div
+      class="flex flex-col sm:flex-row items-center justify-between gap-6 p-6 sm:p-8 rounded-2xl reveal"
+      style="background: linear-gradient(135deg, var(--gold-dim) 0%, transparent 100%); border: 1px solid rgba(241 196 15 / 0.2);"
+    >
+      <div>
+        <p class="text-sm font-semibold mb-1" style="color: var(--text-primary);">
+          ¿Tienes preguntas sobre nuestros espacios publicitarios?
+        </p>
+        <p class="text-xs" style="color: var(--text-muted);">
+          Contáctanos y diseñamos un plan a tu medida. Llegamos a miles de oyentes cada día.
+        </p>
+      </div>
+      <a
+        href={`mailto:${site.sponsorEmail}`}
+        class="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 whitespace-nowrap"
+        style="background-color: var(--gold); color: #0a0a0a;"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        Escribir ahora
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ── Marquee ── */
+  @keyframes marquee-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  .marquee-section {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 4rem 0;
+  }
+
+  .marquee-track {
+    position: relative;
+  }
+
+  .marquee-inner {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll 18s linear infinite;
+  }
+
+  .marquee-inner:hover {
+    animation-play-state: paused;
+  }
+
+  .marquee-fade-left,
+  .marquee-fade-right {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 80px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .marquee-fade-left {
+    left: 0;
+    background: linear-gradient(to right, var(--bg), transparent);
+  }
+  .marquee-fade-right {
+    right: 0;
+    background: linear-gradient(to left, var(--bg), transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-inner {
+      animation: none;
+    }
+  }
+  .tier-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0 0 0 / 0.18);
+    border-color: var(--border-hover) !important;
+  }
+  .tier-cta:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--gold-glow);
+  }
+  a[style*="border: 1px solid var(--border)"].tier-cta:hover {
+    border-color: var(--gold) !important;
+    color: var(--gold) !important;
+    box-shadow: none;
+  }
+</style>

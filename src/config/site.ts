@@ -13,6 +13,22 @@ export interface Host {
   bio: string;
 }
 
+export interface Sponsor {
+  name: string;
+  logo: string;        // URL de imagen o SVG inline
+  url: string;         // enlace al sitio del patrocinante
+  tier: "gold" | "silver" | "bronze";
+  slogan?: string;     // tagline corto opcional
+}
+
+export interface SponsorTier {
+  id: "gold" | "silver" | "bronze";
+  label: string;
+  price: string;       // ej. "USD 200 / mes"
+  description: string;
+  perks: string[];
+}
+
 export const site = {
   name: "Lumen Fidei Radio",
   frequency: "98.1 FM",
@@ -190,6 +206,53 @@ export const site = {
       bio: "Historiadora y hagiógrafa. Devota del santoral y la tradición de la Iglesia.",
     },
   ] satisfies Host[],
+
+  // ── Patrocinantes ─────────────────────────────────────────────────────────
+  // Agrega aquí los patrocinantes activos. Deja el array vacío para ocultar la sección de logos.
+  sponsors: [] as Sponsor[],
+
+  // Planes de patrocinio — edita precios y beneficios según tu oferta
+  sponsorTiers: [
+    {
+      id: "gold",
+      label: "Oro",
+      price: "USD 300 / mes",
+      description: "Máxima visibilidad. Tu marca frente a toda nuestra audiencia.",
+      perks: [
+        "Mención en vivo 5 veces al día",
+        "Logo destacado en el sitio web",
+        "Cuña de 30 seg en programas prime",
+        "Post mensual en redes sociales",
+        "Certificado de patrocinio",
+      ],
+    },
+    {
+      id: "silver",
+      label: "Plata",
+      price: "USD 150 / mes",
+      description: "Presencia constante en nuestra programación diaria.",
+      perks: [
+        "Mención en vivo 2 veces al día",
+        "Logo en el sitio web",
+        "Cuña de 20 seg en programas regulares",
+        "Certificado de patrocinio",
+      ],
+    },
+    {
+      id: "bronze",
+      label: "Bronce",
+      price: "USD 60 / mes",
+      description: "El primer paso para apoyar nuestra misión evangelizadora.",
+      perks: [
+        "Mención semanal en vivo",
+        "Nombre en el sitio web",
+        "Certificado de patrocinio",
+      ],
+    },
+  ] satisfies SponsorTier[],
+
+  // Email de contacto para patrocinantes (puede ser diferente al general)
+  sponsorEmail: "patrocinios@lumenfideiradio.com",
 };
 
 export const DAYS = [
