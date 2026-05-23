@@ -1,0 +1,395 @@
+---
+import SectionTitle from "./SectionTitle.astro";
+import { site } from "../config/site";
+
+const { eyebrow, title, subtitle, impacts, cta, comingSoon } = site.donations;
+---
+
+<section
+  id="donativos"
+  class="py-24 lg:py-32 relative overflow-hidden"
+  aria-labelledby="donativos-title"
+>
+  <!-- Background glows -->
+  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+    <div
+      class="absolute top-10 right-0 w-[420px] h-[420px] rounded-full blur-3xl opacity-40"
+      style="background: radial-gradient(circle, rgba(233,179,58,0.10) 0%, transparent 70%);"
+    ></div>
+    <div
+      class="absolute bottom-10 left-0 w-[360px] h-[360px] rounded-full blur-3xl opacity-30"
+      style="background: radial-gradient(circle, rgba(233,179,58,0.08) 0%, transparent 70%);"
+    ></div>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="reveal" id="donativos-title">
+      <SectionTitle
+        eyebrow={eyebrow}
+        title={title}
+        subtitle={subtitle}
+        center={true}
+      />
+    </div>
+
+    <!-- Impact cards -->
+    <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+      {
+        impacts.map((impact, i) => (
+          <div
+            class={`donation-card relative flex flex-col gap-3 p-6 rounded-2xl transition-all duration-200 reveal reveal-delay-${i + 1}`}
+            style="background-color: var(--bg-card); border: 1px solid var(--border);"
+          >
+            <div
+              class="w-10 h-10 rounded-xl flex items-center justify-center"
+              style="background-color: var(--gold-dim); color: var(--gold);"
+              aria-hidden="true"
+            >
+              {/* Heart-hands icon — same SVG for all to keep it focused on the message */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+            </div>
+
+            <h3
+              class="text-base font-semibold leading-snug"
+              style="color: var(--text-primary);"
+            >
+              {impact.title}
+            </h3>
+            <p class="text-sm leading-relaxed" style="color: var(--text-muted);">
+              {impact.description}
+            </p>
+          </div>
+        ))
+      }
+    </div>
+
+    <!-- Donation CTA banner -->
+    <div
+      class="mt-12 p-8 sm:p-10 rounded-3xl text-center reveal"
+      style="background: linear-gradient(135deg, var(--gold-dim) 0%, transparent 100%); border: 1px solid rgba(233,179,58,0.25);"
+    >
+      <div
+        class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4"
+        style="background-color: var(--gold-dim); color: var(--gold); border: 1px solid rgba(233,179,58,0.25);"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+          ></path>
+        </svg>
+        Tu generosidad nos sostiene
+      </div>
+
+      <h3
+        class="text-2xl sm:text-3xl font-bold mb-3 tracking-tight"
+        style="color: var(--text-primary);"
+      >
+        Apoya nuestra misión evangelizadora
+      </h3>
+      <p
+        class="text-sm sm:text-base max-w-2xl mx-auto mb-6 leading-relaxed"
+        style="color: var(--text-secondary);"
+      >
+        Cada aporte —por pequeño que sea— es semilla que multiplica la Palabra.
+        Súmate a quienes ya sostienen esta señal con su oración y su ofrenda.
+      </p>
+
+      <button
+        id="donate-btn"
+        type="button"
+        class="donate-btn inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer"
+        style="background-color: var(--gold); color: #0a0a0a;"
+        aria-haspopup="dialog"
+        aria-controls="donate-modal"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+          ></path>
+        </svg>
+        {cta.label}
+      </button>
+
+      <p class="text-xs mt-4" style="color: var(--text-muted);">
+        {cta.note}
+      </p>
+    </div>
+  </div>
+
+  <!-- Coming-soon modal -->
+  <dialog
+    id="donate-modal"
+    class="donate-modal"
+    aria-labelledby="donate-modal-title"
+    aria-describedby="donate-modal-desc"
+  >
+    <div class="donate-modal-card">
+      <button
+        type="button"
+        id="donate-close"
+        class="donate-close"
+        aria-label="Cerrar"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div
+        class="donate-modal-icon"
+        aria-hidden="true"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12,6 12,12 16,14"></polyline>
+        </svg>
+      </div>
+
+      <span class="donate-modal-badge">{comingSoon.badge}</span>
+
+      <h3 id="donate-modal-title" class="donate-modal-title">
+        {comingSoon.title}
+      </h3>
+      <p id="donate-modal-desc" class="donate-modal-desc">
+        {comingSoon.description}
+      </p>
+
+      <button
+        type="button"
+        id="donate-ok"
+        class="donate-modal-cta"
+      >
+        {comingSoon.dismiss}
+      </button>
+    </div>
+  </dialog>
+</section>
+
+<style>
+  .donation-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0 0 0 / 0.18);
+    border-color: var(--border-hover) !important;
+  }
+
+  .donate-btn:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px var(--gold-glow);
+  }
+
+  /* ── Native <dialog> ── */
+  .donate-modal {
+    /* Centrado fijo en viewport, independiente del scroll y del parent */
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    height: fit-content;
+    max-height: calc(100dvh - 2rem);
+    width: 100%;
+    max-width: min(92vw, 480px);
+
+    border: none;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    overflow: visible;
+  }
+  .donate-modal::backdrop {
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  /* Animar la tarjeta interna (no el <dialog>) para no romper el centrado */
+  .donate-modal[open] .donate-modal-card {
+    animation: donate-modal-in 0.25s ease-out;
+  }
+  @keyframes donate-modal-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .donate-modal-card {
+    position: relative;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 1.25rem;
+    padding: 2rem 1.75rem 1.75rem;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  }
+
+  .donate-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  .donate-close:hover {
+    background-color: var(--bg-card-hover);
+    color: var(--text-primary);
+  }
+
+  .donate-modal-icon {
+    /* block-level flex para que ocupe su propia línea encima del badge */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin: 0 auto 1rem;
+    border-radius: 1rem;
+    background-color: var(--gold-dim);
+    color: var(--gold);
+  }
+
+  .donate-modal-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    background-color: var(--gold-dim);
+    color: var(--gold);
+    border: 1px solid rgba(233, 179, 58, 0.25);
+    margin-bottom: 0.75rem;
+  }
+
+  .donate-modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-primary);
+    margin: 0 0 0.75rem;
+  }
+
+  .donate-modal-desc {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    margin: 0 0 1.5rem;
+  }
+
+  .donate-modal-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    background-color: var(--gold);
+    color: #0a0a0a;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .donate-modal-cta:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px var(--gold-glow);
+  }
+</style>
+
+<script>
+  const openBtn = document.getElementById("donate-btn");
+  const modal = document.getElementById(
+    "donate-modal"
+  ) as HTMLDialogElement | null;
+  const closeBtn = document.getElementById("donate-close");
+  const okBtn = document.getElementById("donate-ok");
+
+  const open = () => {
+    if (!modal) return;
+    if (typeof modal.showModal === "function") {
+      modal.showModal();
+    } else {
+      modal.setAttribute("open", "");
+    }
+  };
+
+  const close = () => {
+    if (!modal) return;
+    if (typeof modal.close === "function") {
+      modal.close();
+    } else {
+      modal.removeAttribute("open");
+    }
+  };
+
+  openBtn?.addEventListener("click", open);
+  closeBtn?.addEventListener("click", close);
+  okBtn?.addEventListener("click", close);
+
+  // Click outside the card (on backdrop) closes the dialog
+  modal?.addEventListener("click", (event) => {
+    if (event.target === modal) close();
+  });
+</script>

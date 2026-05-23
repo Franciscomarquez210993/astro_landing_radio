@@ -283,6 +283,45 @@ export const site = {
 
   // Email de contacto para patrocinantes (puede ser diferente al general)
   sponsorEmail: "lumenfideiradiofm@gmail.com",
+
+  // ── Donativos ────────────────────────────────────────────────────────────
+  // Toda la copia de la sección de donativos. Cuando los métodos de pago
+  // estén listos, cambia `comingSoon` por la lógica real (link a pasarela,
+  // datos bancarios, etc.).
+  donations: {
+    eyebrow: "Donativos",
+    title: "Sé parte de la misión",
+    subtitle:
+      "Tu donativo sostiene la señal que evangeliza a Acarigua, Araure y toda la región. Cada aporte se convierte en horas de transmisión, oración y servicio.",
+    impacts: [
+      {
+        title: "Mantenemos la señal en el aire",
+        description:
+          "Cubrimos los costos de transmisión, hosting y mantenimiento de los equipos que llevan la Palabra a tu hogar.",
+      },
+      {
+        title: "Producimos contenido católico",
+        description:
+          "Catequesis, música sacra, oración en vivo y testimonios que alimentan tu fe cada día.",
+      },
+      {
+        title: "Llegamos a más almas",
+        description:
+          "Ampliamos nuestro alcance para que el Evangelio llegue a más familias dentro y fuera de Venezuela.",
+      },
+    ],
+    cta: {
+      label: "Quiero donar",
+      note: "Métodos seguros de donación próximamente disponibles",
+    },
+    comingSoon: {
+      badge: "Próximamente",
+      title: "¡Estamos preparando esta sección!",
+      description:
+        "Pronto podrás colaborar con nuestra misión a través de métodos seguros (transferencia, Pago Móvil, Zelle y más). Mientras tanto, también nos ayudas escuchándonos, compartiendo nuestra señal y orando por la radio.",
+      dismiss: "Entendido",
+    },
+  },
 };
 
 export const DAYS = [
