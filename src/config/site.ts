@@ -30,27 +30,56 @@ export interface SponsorTier {
 }
 
 export const site = {
-  name: "Lumen Fidei Radio",
+  name: "Radio Lumen Fidei",
   frequency: "98.1 FM",
-  tagline: "La luz de la fe que ilumina tus días",
+  tagline: "La señal que alimenta tu fe",
   description:
-    "Música sacra, formación espiritual y oración las 24 horas del día. Una voz que acompaña tu camino de fe.",
+    "Somos la voz católica que acompaña tu camino. A través de la palabra, la música y la oración, unimos a la comunidad con una sola misión: llevar el mensaje de salvación y construir una cultura de la vida. Sintonizá la señal que te acerca a Dios.",
 
   // TODO: reemplazar por la URL real del stream (Icecast / Shoutcast / etc.)
   streamUrl: "https://example.com/stream",
   streamFormat: "audio/mpeg" as const, // o "audio/aac"
 
   social: {
-    facebook: "https://facebook.com/lumenfideiradio",
-    instagram: "https://instagram.com/lumenfideiradio",
-    youtube: "https://youtube.com/@lumenfideiradio",
-    whatsapp: "https://wa.me/1234567890",
+    instagram: "https://instagram.com/radio_lumenfidei",
+    youtube: "https://youtube.com/@lumenfideiradio981FM",
+    // Deja en "" si no tienes Facebook; el ícono se ocultará automáticamente.
+    facebook: "",
   },
 
   contact: {
-    email: "contacto@lumenfideiradio.com",
-    phone: "+1 (234) 567-890",
-    address: "Ciudad, País",
+    email: "lumenfideiradiofm@gmail.com",
+    phone: "+58 424 524 8743",
+    // Número WhatsApp en formato internacional, sin '+' ni espacios (para wa.me)
+    whatsappNumber: "584245248743",
+    address: "Acarigua Araure edo Portuguesa, Venezuela",
+  },
+
+  // ── Mensajes pre-llenados para cada CTA que envía a WhatsApp ──────────────
+  // Edita estos textos libremente. Se codifican automáticamente al construir
+  // el enlace con `whatsappLink()`.
+  ctaMessages: {
+    // Saludo genérico (icono de WhatsApp en footer / tarjeta de contacto)
+    greeting:
+      "¡Hola! Les escribo desde la web de Radio Lumen Fidei 98.1 FM.",
+    // Marquee de patrocinantes — "Tu marca aquí"
+    sponsorMarquee:
+      "¡Hola! Vi su web y me interesa anunciar mi marca en Radio Lumen Fidei 98.1 FM. ¿Tienen disponibilidad?",
+    // Banner inferior de patrocinantes — "Escribir ahora"
+    sponsorGeneral:
+      "¡Hola! Tengo preguntas sobre los espacios publicitarios de Radio Lumen Fidei 98.1 FM. ¿Podemos conversar?",
+    // CTA "Consultar espacio" en cada plan de patrocinio
+    sponsorTier: {
+      gold:
+        "¡Hola! Me interesa el plan de patrocinio Oro (USD 300/mes) de Radio Lumen Fidei 98.1 FM. ¿Podemos coordinar?",
+      silver:
+        "¡Hola! Me interesa el plan de patrocinio Plata (USD 150/mes) de Radio Lumen Fidei 98.1 FM. ¿Podemos coordinar?",
+      bronze:
+        "¡Hola! Me interesa el plan de patrocinio Bronce (USD 60/mes) de Radio Lumen Fidei 98.1 FM. ¿Podemos coordinar?",
+    } as Record<"gold" | "silver" | "bronze", string>,
+    // CTA "Enviar petición" en la sección de contacto
+    prayerRequest:
+      "¡Hola! Quisiera enviar una petición de oración a la comunidad de Radio Lumen Fidei 98.1 FM. Mi petición es: ",
   },
 
   programs: [
@@ -219,7 +248,7 @@ export const site = {
       price: "USD 300 / mes",
       description: "Máxima visibilidad. Tu marca frente a toda nuestra audiencia.",
       perks: [
-        "Mención en vivo 5 veces al día",
+        "Mención en nuestra programación 15 veces al día",
         "Logo destacado en el sitio web",
         "Cuña de 30 seg en programas prime",
         "Post mensual en redes sociales",
@@ -232,9 +261,9 @@ export const site = {
       price: "USD 150 / mes",
       description: "Presencia constante en nuestra programación diaria.",
       perks: [
-        "Mención en vivo 2 veces al día",
+        "Mención en nuestra programación 10 veces al día",
         "Logo en el sitio web",
-        "Cuña de 20 seg en programas regulares",
+        "Cuña de 30 seg en programas regulares",
         "Certificado de patrocinio",
       ],
     },
@@ -244,15 +273,16 @@ export const site = {
       price: "USD 60 / mes",
       description: "El primer paso para apoyar nuestra misión evangelizadora.",
       perks: [
-        "Mención semanal en vivo",
-        "Nombre en el sitio web",
+        "Mención en nuestra programación 5 veces al día",
+        "Logo en el sitio web",
+        "Cuña de 30 seg en programas regulares",
         "Certificado de patrocinio",
       ],
     },
   ] satisfies SponsorTier[],
 
   // Email de contacto para patrocinantes (puede ser diferente al general)
-  sponsorEmail: "patrocinios@lumenfideiradio.com",
+  sponsorEmail: "lumenfideiradiofm@gmail.com",
 };
 
 export const DAYS = [
@@ -264,3 +294,13 @@ export const DAYS = [
   "Sábado",
   "Domingo",
 ] as const;
+
+/**
+ * Construye un enlace `https://wa.me/...` opcionalmente con un mensaje
+ * pre-llenado. Centraliza el formato para que todos los CTAs usen el mismo
+ * número y el texto se codifique correctamente.
+ */
+export function whatsappLink(message?: string): string {
+  const base = `https://wa.me/${site.contact.whatsappNumber}`;
+  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
+}

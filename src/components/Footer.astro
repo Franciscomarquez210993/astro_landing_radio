@@ -1,5 +1,5 @@
 ---
-import { site } from "../config/site";
+import { site, whatsappLink } from "../config/site";
 
 const currentYear = new Date().getFullYear();
 
@@ -97,12 +97,12 @@ const navLinks = [
             )
           }
           {
-            site.social.whatsapp && (
+            site.contact.whatsappNumber && (
               <a
-                href={site.social.whatsapp}
+                href={whatsappLink(site.ctaMessages.greeting)}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="WhatsApp"
+                aria-label="Escríbenos por WhatsApp"
                 class="social-icon w-9 h-9 rounded-lg border flex items-center justify-center transition-all duration-200"
                 style="border-color: var(--border); color: var(--text-muted);"
               >
