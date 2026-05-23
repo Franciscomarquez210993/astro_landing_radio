@@ -68,6 +68,10 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Evita scroll horizontal global por elementos decorativos que se salgan
+     del viewport. `clip` es preferible a `hidden` porque no crea un
+     contenedor de scroll (no rompe `position: sticky` ni el smooth-scroll). */
+  overflow-x: clip;
 }
 
 body {
@@ -75,6 +79,7 @@ body {
   color: var(--text-primary);
   font-family: "Roboto", ui-sans-serif, system-ui, sans-serif;
   min-height: 100dvh;
+  overflow-x: clip;
   transition:
     background-color 0.3s ease,
     color 0.3s ease;
