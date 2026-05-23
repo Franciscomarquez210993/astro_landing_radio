@@ -161,7 +161,7 @@ export const site = {
     },
     {
       day: "Domingo",
-      time: "18:19",
+      time: "18:00",
       title: "Vísperas",
       host: "Coro Lumen Fidei",
       description: "Cierre del día con la oración vespertina cantada.",
